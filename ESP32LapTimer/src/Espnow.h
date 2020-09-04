@@ -8,6 +8,6 @@
 void espnow_init(uint8_t if_type);
 
 void espnow_sendPacket(void* output, uint8_t* data, size_t len);
-void espnow_update(void* output);
+void espnow_processPacket(void* output);
 
 #endif /* _ESPNOW_H_ */

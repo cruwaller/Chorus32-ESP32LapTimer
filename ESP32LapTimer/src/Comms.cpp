@@ -354,16 +354,6 @@ void setRaceMode(uint8_t mode) {
     }
     //playStartRaceTones();
   }
-
-#if defined(ESP_NOW_PEERS)
-  // Send esp_now
-  esp_now_send_lap_s lap_info = {
-    .lap_time = 0, .race_id = getRaceNum(),
-    .lap = 0, .node = 0,
-    .type = (mode == 0) ? ESPNOW_TYPE_RACE_STOP: ESPNOW_TYPE_RACE_START,
-  };
-  esp_now_send(NULL, (uint8_t*)&lap_info, sizeof(lap_info));
-#endif
 }
 
 void setMinLap(uint8_t mlt) {
@@ -725,6 +715,15 @@ void SendRaceMode(uint8_t NodeAddr) {
   addToSendQueue(TO_HEX(raceMode));
   addToSendQueue('\n');
 
+#if defined(ESP_NOW_PEERS)
+  // Send esp_now
+  esp_now_send_lap_s lap_info = {
+    .lap_time = 0, .race_id = getRaceNum(),
+    .lap = 0, .node = NodeAddr,
+    .type = (raceMode == 0) ? ESPNOW_TYPE_RACE_STOP: ESPNOW_TYPE_RACE_START,
+  };
+  esp_now_send(NULL, (uint8_t*)&lap_info, sizeof(lap_info));
+#endif
 }
 
 
@@ -971,7 +970,7 @@ void handleExtendedCommands(uint8_t* data, uint8_t length) {
 
 void handleSerialControlInput(char *controlData, uint8_t  ControlByte, uint8_t NodeAddr, uint8_t length) {
   uint8_t valueToSet;
-  uint8_t NodeAddrByte = TO_BYTE(NodeAddr); // convert ASCII to real byte values
+  uint8_t NodeAddrByte = (NodeAddr == '*') ? '*' : TO_BYTE(NodeAddr); // convert ASCII to real byte values
 
   if (!controlData || !length)
     return;
@@ -1063,10 +1062,18 @@ void handleSerialControlInput(char *controlData, uint8_t  ControlByte, uint8_t N
         isConfigured = 1;
         break;
 
-      case CONTROL_FREQUENCY:
-        //  TODO: convert to band/freq?
+      case CONTROL_FREQUENCY: {
+        uint16_t freq = (HEX_TO_UINT16((uint8_t*)&controlData[3]));
+        freq = getFreqIndexByFrequency(freq);
+        // Set channel to RF module
+        setPilotBandChannel(NodeAddrByte, (freq / 8), (freq % 8));
+        // Send info to all clients
+        SendVRxBand(NodeAddrByte);
+        SendVRxChannel(NodeAddrByte);
+        SendVRxFreq(NodeAddrByte);
         isConfigured = 1;
         break;
+      }
 
       case CONTROL_RSSI_MON_INTERVAL:
         rssiMonitorInterval = (HEX_TO_UINT16((uint8_t*)&controlData[3]));

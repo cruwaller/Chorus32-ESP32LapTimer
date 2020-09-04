@@ -256,7 +256,7 @@ function handle_message(message) {
 	if(extended) {
 		message = message.substr(1);
 	}
-	var pilot_num = parseInt(message[1]);
+	var pilot_num = parseInt(message[1], 16);
 	var cmd = message[2];
 
 	// Extended commands

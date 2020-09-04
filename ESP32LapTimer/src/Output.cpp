@@ -65,7 +65,7 @@ static output_t outputs[] = {
   {NULL, NULL, send_websocket, read_websocket, output_input_callback},
 #endif // USE_WEBSOCKET_OUTPUT
 #ifdef ESP_NOW_PEERS
-  {NULL, NULL, espnow_sendPacket, espnow_update, output_input_callback},
+  {NULL, NULL, espnow_sendPacket, espnow_processPacket, output_input_callback},
 #endif
 };
 

@@ -65,6 +65,28 @@ String getMacAddress() {
   return cMac;
 }
 
+void handleMacAddress(AsyncWebServerRequest* req)
+{
+  uint8_t primaryChan;
+  wifi_second_chan_t secondChan;
+  esp_wifi_get_channel(&primaryChan, &secondChan);
+  (void)secondChan;
+
+  String message = "WiFi STA MAC: ";
+  message += WiFi.macAddress();
+  message += "\n  - channel in use: ";
+  message += primaryChan;
+  message += "\n  - mode: ";
+  message += (uint8_t)WiFi.getMode();
+  message += "\n\nWiFi SoftAP MAC: ";
+  message += WiFi.softAPmacAddress();
+  message += "\n  - IP: ";
+  message += WiFi.softAPIP().toString();
+  message += "\n";
+  req->send(200, "text/plain", message);
+}
+
+
 String getContentType(String filename) { // convert the file extension to the MIME type
   if (filename.endsWith(".html")) return "text/html";
   else if (filename.endsWith(".htm")) return "text/html";
@@ -127,21 +149,22 @@ void onWebsocketEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, Aw
   Serial.print("Got websocket message: ");
   Serial.write(data, len);
   Serial.println("");
-  if(xSemaphoreTake(websocket_lock, portMAX_DELAY)){
-    //Handle WebSocket event
-    if(type == WS_EVT_DATA){
-      //data packet
-      AwsFrameInfo * info = (AwsFrameInfo*)arg;
-      if(info->final && info->index == 0 && info->len == len){
+  //Handle WebSocket event
+  if(type == WS_EVT_DATA){
+    //data packet
+    AwsFrameInfo * info = (AwsFrameInfo*)arg;
+    if(info->final && info->index == 0 && info->len == len){
+      /* Lock before write into buffer */
+      if(xSemaphoreTake(websocket_lock, portMAX_DELAY)){
         //the whole message is in a single frame and we got all of it's data
         // we'll ignore fragmented messages for now
         if(websocket_buffer_pos + len < WEBSOCKET_BUF_SIZE) {
           memcpy(websocket_buffer + websocket_buffer_pos, data, len);
           websocket_buffer_pos += len;
         }
+        xSemaphoreGive(websocket_lock);
       }
     }
-    xSemaphoreGive(websocket_lock);
   }
 }
 
@@ -201,6 +224,7 @@ void InitWebServer() {
     }
   });
 
+  webServer.on("/mac", handleMacAddress);
 
   webServer.on("/start_race", startRace_button);
   webServer.on("/stop_race", stopRace_button);

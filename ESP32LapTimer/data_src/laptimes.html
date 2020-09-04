@@ -66,12 +66,22 @@
 					<!-- TODO: export times button -->
 				</tr>
 			</table>
-			<div id="button_table_container">
+
+            <div id="button_table_container">
 				<div class="tab" id="round_buttons" style="width:100%"></div>
 				<div id="table_container"></div> <!-- end container for tabs -->
 				<div class="ct-chart ct-octave" id="graph_div"></div>
 			</div>
-		</div>
+
+            <div align="center">
+                <hr />
+                <button id="fetch_result_button" style="width:100px; padding: 0px 0px 0px 0px; font-size: 12px;">Fetch last</button>
+                <hr>
+                <div id="last_times">
+                    <!-- table comes here if available -->
+                </div>
+            </div>
+        </div>
 	</section>
 
 	<div style="display:none">
@@ -85,15 +95,6 @@
 				<td align="center">Best Lap</td>
 			</tr>
 		</table>
-	</div>
-
-	<div align="center">
-		<hr/>
-		<button id="fetch_result_button" style="width:100px; padding: 0px 0px 0px 0px; font-size: 12px;">Fetch last</button>
-		<hr>
-		<div id="last_times">
-			<!-- table comes here if available -->
-		</div>
 	</div>
 
 <script>
