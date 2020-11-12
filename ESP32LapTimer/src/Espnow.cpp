@@ -124,10 +124,19 @@ void espnow_init(uint8_t if_type)
 void IRAM_ATTR espnow_sendPacket(void* output, uint8_t* data, size_t len)
 {
 #if defined(ESP_NOW_PEERS)
-    // TODO: Send just required packets!!
-    if (data[2] == 'L') return;
+    /* Index is 3 if extended command */
+    uint8_t const type_idx = ((data[0] == 'E' && data[1] == 'S') ? 3 : 2);
 
-    esp_now_send(NULL, data, len);
+    /* Just send the wanted messages */
+    switch (data[type_idx]) {
+        case 'M':
+        case 'R': {
+            esp_now_send(NULL, data, len);
+            break;
+        }
+        default:
+            break;
+    }
 #endif // ESP_NOW_PEERS
 }
 
