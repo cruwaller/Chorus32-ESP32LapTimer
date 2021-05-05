@@ -55,8 +55,9 @@
 //#define USE_BLUETOOTH
 // For now the bluetooth name needs to be defined regardless of if it's enabled or not
 #define BLUETOOTH_NAME WIFI_AP_NAME
+
 /// Outputs all messages on the serial port. Used to use Livetime via USB
-#define USE_SERIAL_OUTPUT
+//#define USE_SERIAL_OUTPUT
 #define USE_WEBSOCKET_OUTPUT
 
 // Enable TCP support. Currently this needs a special version of the app: https://github.com/Smeat/Chorus-RF-Laptimer/releases/tag/tcp_support

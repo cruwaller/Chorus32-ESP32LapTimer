@@ -723,6 +723,7 @@ void SendRaceMode(uint8_t NodeAddr) {
     .type = (raceMode == 0) ? ESPNOW_TYPE_RACE_STOP: ESPNOW_TYPE_RACE_START,
   };
   esp_now_send(NULL, (uint8_t*)&lap_info, sizeof(lap_info));
+  //Serial.printf("race: mode: %u, node: %u, num: %u\r\n", raceMode, NodeAddr, getRaceNum());
 #endif
 }
 
